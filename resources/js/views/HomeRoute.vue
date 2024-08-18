@@ -5,7 +5,7 @@
 <template>
     <div>
         <h1>Home</h1>
-        <router-link to="/test">Перейди на тест page</router-link>
+        <router-link :to="{ name: 'test' }">Перейди на тест page</router-link>
     </div>
 
     <div>
