@@ -20,6 +20,8 @@
                     getToken();
                 }
                 router.push({ name: 'user.personal'});
+            }).catch(e => {
+                console.log(e);
             })
         });
     }
@@ -28,16 +30,16 @@
 
 <template>
 
-    <div class="w-full text-center">
+    <div class="w-96 mx-auto">
         <form @submit.prevent="login">
             <div class="mb-3">
-                <input type="email" placeholder="email" class="form-control" v-model="form.email">
+                <input type="email" placeholder="email" class="w-96 p-1 mb-2 border border-inherit rounded-lg" v-model="form.email">
             </div>
             <div class="mb-3">
-                <input type="password" placeholder="password" class="form-control" v-model="form.password">
+                <input type="password" placeholder="password" class="w-96 p-1 mb-2 border border-inherit rounded-lg" v-model="form.password">
             </div>
             <div class="mb-3">
-                <input type="submit" value="Login" class="hover:text-sky-500 cursor-pointer">
+                <input type="submit" value="Login" class="hover:text-red-700 block float-right mx-auto w-32 p-1 bg-sky-400 text-white cursor-pointer">
             </div>
         </form>
     </div>

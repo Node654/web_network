@@ -1,28 +1,35 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeRoute from "../views/HomeRoute.vue";
-import TestRoute from "../views/TestRoute.vue";
 import Login from "../views/user/Login.vue";
 import Register from "../views/user/Register.vue";
 import Personal from "../views/user/Personal.vue";
+import Index from "../views/Index.vue";
+import Page from "../views/Page.vue";
 
 const routes = [
     {
         path: '/',
-        component: HomeRoute,
+        component: Index,
+        name: 'index',
     },
     {
-        path: '/test',
-        component: TestRoute,
-        name: 'test'
+        path: '/page',
+        component: Page,
+        name: 'page'
     },
     {
-        path: '/user/login', component: Login, name: 'user.login'
+        path: '/user/login',
+        component: Login,
+        name: 'user.login'
     },
     {
-        path: '/user/register', component: Register, name: 'user.register'
+        path: '/user/register',
+        component: Register,
+        name: 'user.register'
     },
     {
-        path: '/user/personal', component: Personal, name: 'user.personal'
+        path: '/personal',
+        component: Personal,
+        name: 'user.personal'
     },
 ];
 
@@ -35,7 +42,7 @@ router.beforeEach((to, from, next) => {
     axios.get('/api/user')
         .catch(e => {
             if (e.response.status === 401) {
-                localStorage.key('x-xsrf-token') ? localStorage.removeItem('x-xsrf-token') : '';
+                localStorage.key('x_xsrf_token') ? localStorage.removeItem('x_xsrf_token') : '';
             }
         });
 
@@ -51,7 +58,7 @@ router.beforeEach((to, from, next) => {
         }
     }
 
-    if (to.name === 'user.login' || to.name === 'user.register' && token) {
+    if (to.name === 'user.login' || to.name === 'user.register' || !to.name && token) {
         return next({
             name: 'user.personal'
         })

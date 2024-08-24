@@ -21,39 +21,63 @@
                 password_confirmation: form.password_confirmation
             }).then(response => {
                 // обработать валидацию!
-                console.log(response);
                 localStorage.setItem('x_xsrf_token', document.cookie.match(/XSRF-TOKEN=([^;]*)/)[1]);
                 if (getToken) {
                     getToken();
                 }
+                console.log(response);
                 router.push({ name: 'user.personal'});
             }).catch(rejected => {
                 console.log(rejected);
             })
-        })
+        }).catch(error => {
+            console.error('Error getting CSRF token:', error);
+        });
     }
-
 
 </script>
 
 <template>
 
-    <div class="mt-5 p-5">
+    <div class="w-96 mx-auto">
         <form @submit.prevent="register">
             <div class="mb-3">
-                <input type="text" placeholder="name" class="form-control" v-model="form.name">
+                <input
+                    type="text"
+                    placeholder="name"
+                    class=" w-96 p-1 mb-2 border border-inherit rounded-lg"
+                    v-model="form.name"
+                >
             </div>
             <div class="mb-3">
-                <input type="email" placeholder="email" class="form-control" v-model="form.email">
+                <input
+                    type="email"
+                    placeholder="email"
+                    class="w-96 p-1 mb-2 border border-inherit rounded-lg"
+                    v-model="form.email"
+                >
             </div>
             <div class="mb-3">
-                <input type="password" placeholder="password" class="form-control" v-model="form.password">
+                <input
+                    type="password"
+                    placeholder="password"
+                    class="w-96 p-1 mb-2 border border-inherit rounded-lg"
+                    v-model="form.password"
+                >
             </div>
             <div class="mb-3">
-                <input type="password" placeholder="password_confirmation" class="form-control" v-model="form.password_confirmation">
+                <input
+                    type="password"
+                    placeholder="password_confirmation"
+                    class="w-96 p-1 mb-2 border border-inherit rounded-lg"
+                    v-model="form.password_confirmation"
+                >
             </div>
             <div class="mb-3">
-                <input type="submit" value="Register" class="btn btn-primary">
+                <button
+                    type="submit"
+                    class="hover:text-red-500 cursor-pointer block float-right mx-auto w-32 p-1 bg-sky-400  text-white rounded-lg"
+                >Register</button>
             </div>
         </form>
     </div>
