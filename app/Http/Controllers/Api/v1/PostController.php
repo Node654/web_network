@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Post\StoreRequest;
 use App\Http\Resources\Post\PostResource;
+use App\Models\LikedPost;
 use App\Models\Post;
 use App\Models\PostImage;
 use Illuminate\Http\JsonResponse;
@@ -14,6 +15,18 @@ use Storage;
 
 class PostController extends Controller
 {
+    public function index()
+    {
+        $posts = Post::where('user_id', auth()->id())->latest()->get();
+        $likedPosts = LikedPost::where('user_id', auth()->id())->get('post_id')->pluck('post_id')->toArray();
+        foreach ($posts as $post) {
+            if (in_array($post->id, $likedPosts)) {
+                $post->is_liked = true;
+            }
+        }
+        return PostResource::collection($posts);
+    }
+
     public function store(StoreRequest $storeRequest)
     {
         try {
@@ -34,7 +47,7 @@ class PostController extends Controller
         return new PostResource($post);
     }
 
-    private function associateImageWithPost(int $postId, int $imageId): void
+    private function associateImageWithPost(?int $postId, ?int $imageId): void
     {
         if (isset($imageId)) {
             PostImage::where('id', $imageId)->update([
@@ -42,6 +55,13 @@ class PostController extends Controller
                 'is_active' => true
             ]);
         }
+    }
 
+    public function likedPost(Post $post)
+    {
+        $attached = auth()->user()->likedPosts()->toggle($post->id);
+        $post->is_liked = count($attached['attached']) > 0;
+        $post->likes_count = $post->likesPosts()->count();
+        return PostResource::make($post);
     }
 }

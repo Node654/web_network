@@ -1,6 +1,9 @@
 <script setup>
 
-import {reactive, ref} from "vue";
+import {inject, onMounted, provide, reactive, ref, watch} from "vue";
+import Post from "../../components/Post.vue";
+import {useRouter} from "vue-router";
+import axios from "axios";
 
     const form = reactive({
         title: '',
@@ -8,30 +11,48 @@ import {reactive, ref} from "vue";
         image: null
     })
 
+    const router = useRouter();
     const file = ref(null);
     const image = ref(null);
+    const posts = ref(null);
+    const checkToken = inject('checkToken');
 
-    function addPost() {
-        const imageId = image.value ? image.value.id : null;
 
-        axios.post('/api/posts', {title: form.title, content: form.content, image_id: imageId}).then(response => {
-            console.log(response);
-        }).catch(reject => {
+    onMounted(() => {
+        getPosts();
+    })
 
+    function getPosts()
+    {
+        axios.get('/api/posts').then(response => {
+            posts.value = response.data.data;
         })
     }
 
-    function selectFile() {
-        file.value.click();
+    function addPost() {
+        if (checkToken()) {
+            const imageId = image.value ? image.value.id : null;
+            axios.post('/api/posts', {title: form.title, content: form.content, image_id: imageId}).then(response => {
+                posts.value.unshift(response.data.data);
+            })
+        }
     }
 
     function storeImage(e) {
         const file = e.target.files[0];
         const formData = new FormData();
         formData.append('image', file);
-        axios.post('api/posts/images', formData).then(response => {
-            image.value = response.data.data;
-        });
+        if (checkToken()) {
+            axios.post('api/posts/images', formData).then(response => {
+                image.value = response.data.data;
+            });
+        }
+    }
+
+    function selectFile() {
+        if (checkToken()) {
+            file.value.click();
+        }
     }
 
     function removeImageInput() {
@@ -80,6 +101,11 @@ import {reactive, ref} from "vue";
             <input type="submit" class="block hover:bg-gray-600 hover:text-red-700 border-2 rounded-full bg-sky-400 p-3 w-28 cursor-pointer ml-auto" value="Add">
         </div>
     </form>
+
+    <div v-if="posts" class="mt-7">
+        <h1 class="text-4xl mb-10">Posts</h1>
+        <Post v-for="post in posts" :post="post"/>
+    </div>
 </div>
 
 </template>

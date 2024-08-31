@@ -1,6 +1,6 @@
 <script setup>
 
-    import {inject, reactive} from "vue";
+    import {inject, onMounted, reactive} from "vue";
     import {useRouter} from "vue-router";
 
     const router = useRouter();
@@ -9,6 +9,9 @@
         password: null,
     });
     const getToken = inject("getToken");
+    onMounted(() => {
+        getToken();
+    });
     function login() {
         axios.get('/sanctum/csrf-cookie').then(response => {
             axios.post('/login', {

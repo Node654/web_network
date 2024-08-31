@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -43,5 +45,25 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getDateAttribute()
+    {
+        return $this->created_at->diffForHumans();
+    }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class, 'user_id', 'id')->latest();
+    }
+
+    public function followings(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'subscriber_followings', 'subscriber_id', 'following_id');
+    }
+
+    public function likedPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(Post::class, 'liked_posts', 'user_id', 'post_id');
     }
 }

@@ -2,27 +2,27 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "../views/user/Login.vue";
 import Register from "../views/user/Register.vue";
 import Personal from "../views/user/Personal.vue";
-import Index from "../views/Index.vue";
-import Page from "../views/Page.vue";
+import Index from "../views/user/Index.vue";
+import Show from "../views/user/Show.vue";
 
 const routes = [
     {
-        path: '/',
+        path: '/users',
         component: Index,
-        name: 'index',
+        name: 'user.index'
     },
     {
-        path: '/page',
-        component: Page,
-        name: 'page'
+        path: '/users/:id/posts',
+        component: Show,
+        name: 'user.show'
     },
     {
-        path: '/user/login',
+        path: '/login',
         component: Login,
         name: 'user.login'
     },
     {
-        path: '/user/register',
+        path: '/register',
         component: Register,
         name: 'user.register'
     },
