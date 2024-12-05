@@ -4,6 +4,7 @@ import Register from "../views/user/Register.vue";
 import Personal from "../views/user/Personal.vue";
 import Index from "../views/user/Index.vue";
 import Show from "../views/user/Show.vue";
+import Feed from "../views/user/Feed.vue";
 
 const routes = [
     {
@@ -26,11 +27,15 @@ const routes = [
         component: Register,
         name: 'user.register'
     },
-    {
-        path: '/personal',
+    {   path: '/personal',
         component: Personal,
         name: 'user.personal'
     },
+    {
+        path: '/feed',
+        component: Feed,
+        name: 'user.feed'
+    }
 ];
 
 const router = createRouter({

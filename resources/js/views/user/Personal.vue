@@ -1,9 +1,10 @@
 <script setup>
 
-import {inject, onMounted, provide, reactive, ref, watch} from "vue";
+import {computed, inject, onMounted, provide, reactive, ref, watch} from "vue";
 import Post from "../../components/Post.vue";
 import {useRouter} from "vue-router";
 import axios from "axios";
+import Stat from "../../components/Stat.vue";
 
     const form = reactive({
         title: '',
@@ -14,18 +15,32 @@ import axios from "axios";
     const router = useRouter();
     const file = ref(null);
     const image = ref(null);
-    const posts = ref(null);
+    const posts = ref({});
+    const errors = ref([]);
     const checkToken = inject('checkToken');
-
+    const stats = ref({});
+    const totalLikesCount = ref(0);
 
     onMounted(() => {
         getPosts();
+        getStats();
     })
 
     function getPosts()
     {
         axios.get('/api/posts').then(response => {
             posts.value = response.data.data;
+
+        })
+    }
+
+    function getStats() {
+        axios.post('/api/users/stats', {user_id: null}).then(response => {
+            stats.value = response.data.data;
+            totalLikesCount.value = computed(() => {
+                return posts.value.reduce((acc, post) => acc + post.likes_count, 0)
+            });
+            stats.value.likes_count = totalLikesCount;
         })
     }
 
@@ -34,6 +49,9 @@ import axios from "axios";
             const imageId = image.value ? image.value.id : null;
             axios.post('/api/posts', {title: form.title, content: form.content, image_id: imageId}).then(response => {
                 posts.value.unshift(response.data.data);
+                stats.value.posts_count++;
+            }).catch(reject => {
+                errors.value = reject.response.data.errors;
             })
         }
     }
@@ -64,6 +82,9 @@ import axios from "axios";
 <template>
 
 <div class="w-96 mx-auto text-center">
+
+    <Stat :stats="stats" />
+
     <h1 class="mb-4">Personal</h1>
     <form @submit.prevent="addPost">
         <div class="mb-4">
@@ -75,6 +96,8 @@ import axios from "axios";
                 id="title"
                 class="ml-1.5 w-64 border-2 border-blue-400 p-1 rounded-lg"
             >
+            <p v-if="errors" v-for="message in errors.title" class="text-red-500 text-sm italic font-bold">{{ message }}</p>
+
         </div>
         <div class="mb-4">
             <label for="content">Content:</label>
@@ -84,13 +107,14 @@ import axios from "axios";
                 rows="1"
                 id="content"
             ></textarea>
+            <p v-if="errors" v-for="message in errors.content" class="text-red-500 text-sm italic font-bold">{{ message }}</p>
         </div>
         <div class="flex items-center pl-4 pr-4 mb-3">
             <div>
                 <input @change="storeImage" type="file" class="hidden" ref="file">
                 <input @click.prevent="selectFile" type="submit" class="hover:bg-gray-600 hover:text-red-700 border-2 rounded-full bg-sky-400 p-3 w-28 cursor-pointer" value="Image">
             </div>
-            <div class="ml-4">
+            <div class="ml-4" v-if="image">
                 <input @click.prevent="removeImageInput" type="submit" class="hover:bg-gray-600 hover:text-red-700 border-2 rounded-full bg-sky-400 p-3 w-36 cursor-pointer" value="Remove image">
             </div>
         </div>
@@ -104,7 +128,7 @@ import axios from "axios";
 
     <div v-if="posts" class="mt-7">
         <h1 class="text-4xl mb-10">Posts</h1>
-        <Post v-for="post in posts" :post="post"/>
+        <Post v-for="post in posts" :post="post" :key="post.id" :stats="stats"/>
     </div>
 </div>
 

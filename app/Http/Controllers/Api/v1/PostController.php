@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Post\RepostPostRequest;
 use App\Http\Requests\Post\StoreRequest;
 use App\Http\Resources\Post\PostResource;
+use App\Http\Resources\User\UserResource;
+use App\Http\Resources\Comment\CommentResource;
+use App\Http\Requests\Comment\StoreRequest as CommentRequest;
 use App\Models\LikedPost;
 use App\Models\Post;
+use App\Models\Comment;
 use App\Models\PostImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +22,8 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::where('user_id', auth()->id())->latest()->get();
+        $posts = Post::where('user_id', auth()->id())->withCount('reposted')->latest()->get();
+
         $likedPosts = LikedPost::where('user_id', auth()->id())->get('post_id')->pluck('post_id')->toArray();
         foreach ($posts as $post) {
             if (in_array($post->id, $likedPosts)) {
@@ -47,14 +53,12 @@ class PostController extends Controller
         return new PostResource($post);
     }
 
-    private function associateImageWithPost(?int $postId, ?int $imageId): void
+    public function repost(RepostPostRequest $request, Post $post)
     {
-        if (isset($imageId)) {
-            PostImage::where('id', $imageId)->update([
-                'post_id' => $postId,
-                'is_active' => true
-            ]);
-        }
+        $data = $request->validated();
+        $data['user_id'] = auth()->id();
+        $data['reposted_id'] = $post->id;
+        Post::create($data);
     }
 
     public function likedPost(Post $post)
@@ -63,5 +67,29 @@ class PostController extends Controller
         $post->is_liked = count($attached['attached']) > 0;
         $post->likes_count = $post->likesPosts()->count();
         return PostResource::make($post);
+    }
+
+    public function commentStore(Post $post, CommentRequest $request)
+    {
+        $data = $request->validated();
+        $data['user_id'] = auth()->id();
+        $data['post_id'] = $post->id;
+        $comment = Comment::create($data);
+        return new CommentResource($comment);
+    }
+
+    public function commentsList(Post $post)
+    {
+        return CommentResource::collection($post->comments()->latest()->get());
+    }
+
+    private function associateImageWithPost(?int $postId, ?int $imageId): void
+    {
+        if (isset($imageId)) {
+            PostImage::where('id', $imageId)->update([
+                'post_id' => $postId,
+                'is_active' => true
+            ]);
+        }
     }
 }

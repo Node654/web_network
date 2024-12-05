@@ -6,7 +6,7 @@ use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PostResource extends JsonResource
+class RepostPostResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -20,12 +20,6 @@ class PostResource extends JsonResource
             'title' => $this->title,
             'content' => $this->content,
             'image_url' => $this->image->url ?? null,
-            'create_post' => $this->data,
-            'is_liked' => $this->is_liked ?? false,
-            'likes_count' => $this->likesPosts->count(),
-            'reposted_post' => new RepostPostResource($this->repostedPost),
-            //'reposted_count' => $this->repostedCountPost() ?? 0,
-            'comments_count' => $this->comments_count,
             'reposted_count' => $this->reposted_count,
             'user' => new UserResource($this->user),
         ];

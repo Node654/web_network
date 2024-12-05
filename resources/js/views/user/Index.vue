@@ -19,7 +19,7 @@
 
     function toggleFollowing(user) {
         if (checkToken()) {
-            axios.get(`/api/users/${user.id}/toggle_following`).then(response => {
+            axios.post(`/api/users/${user.id}/toggle_following`).then(response => {
                 console.log(response)
                 user.is_followed = response.data.data.is_followed;
 
@@ -48,7 +48,7 @@
                 <div>
                     <input
                         @click.prevent="toggleFollowing(user)"
-                        type="submit" value="following"
+                        type="submit" :value="user.is_followed ? 'Unfollowed' : 'Followed'"
                         :class="['text-lg cursor-pointer p-3  w-28 rounded-lg', user.is_followed ? 'bg-green-500 hover:text-amber-800 text-white' : 'bg-sky-500 hover:text-red-700']"
                     >
                 </div>
